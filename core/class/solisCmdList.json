@@ -1,0 +1,168 @@
+{
+   "commands":[
+      {
+         "logicalId":"refresh",
+         "name":"Refresh",
+         "type":"action",
+         "subType":"other",
+         "unit":"",
+         "order":"1",
+         "historized":false,
+         "visible":false
+      },
+      {
+         "logicalId":"invertertype",
+         "name":"Inverter type: ",
+         "type":"info",
+         "subType":"string",
+         "unit":"",
+         "order":"2",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"inverterType"
+      },
+      {
+         "logicalId":"inverterstatus",
+         "name":"Inverter status: ",
+         "type":"info",
+         "subType":"string",
+         "unit":"",
+         "order":"3",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"state"
+      },
+      {
+         "logicalId":"acpower",
+         "name":"Solar AC Power (Total)",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"W",
+         "order":"4",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"pac"
+      },
+      {
+         "logicalId":"yieldtoday",
+         "name":"AC Energy Out (Daily)",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"kWh",
+         "order":"5",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"eToday"
+      },
+      {
+         "logicalId":"yieldtotal",
+         "name":"AC Energy Out (Total)",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"kWh",
+         "order":"6",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"eTotal"
+      },
+      {
+         "logicalId":"consumeenergy",
+         "name":"Energy from Grid (Total)",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"kWh",
+         "order":"9",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"totalLoadPower"
+      },
+      {
+         "logicalId":"soc",
+         "name":"DC Battery",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"%",
+         "order":"11",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"batteryCapacitySoc"
+      },
+      {
+         "logicalId":"batPower",
+         "name":"Battery Power",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"W",
+         "order":"15",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"psum"
+      },
+      {
+         "logicalId":"powerdc1",
+         "name":"Power DC1",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"W",
+         "order":"16",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"pow1"
+      },
+      {
+         "logicalId":"powerdc2",
+         "name":"Power DC2",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"W",
+         "order":"17",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"pow2"
+      },
+      {
+         "logicalId":"powerdc3",
+         "name":"Power DC3",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"W",
+         "order":"18",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"pow3"
+      },
+      {
+         "logicalId":"uploadTime",
+         "name":"Update time: ",
+         "type":"info",
+         "subType":"string",
+         "unit":"",
+         "order":"19",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"timeStr"
+      },
+      {
+         "logicalId":"gridPower",
+         "name":"Grid power: ",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"kW",
+         "order":"20",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"psum"
+      },
+      {
+         "logicalId":"inverterTemperature",
+         "name":"Inverter temperature: ",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"℃",
+         "order":"21",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"inverterTemperature"
+      }
+   ]
+}
