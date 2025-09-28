@@ -18,19 +18,37 @@
 
 
 
+/* Classe soliscloudApi : permet d'interagir avec l'API SolisCloud pour récupérer des informations sur un onduleur.
+ * Utilisée dans le plugin Jeedom pour la gestion des équipements SolisCloud.
+ */
+
 class soliscloudApi {
+    // Identifiants d'authentification API
     private $apiId;
     private $apiSecret;
+    // URL de base de l'API SolisCloud
     private $baseUrl = 'https://www.soliscloud.com:13333';
 	
-	public $inverterDetail = array();
+    // Détail de l'onduleur récupéré depuis l'API
+    public $inverterDetail = array();
 
+    /**
+     * Constructeur de la classe
+     * @param string $apiId Identifiant API
+     * @param string $apiSecret Clé secrète API
+     */
     public function __construct($apiId, $apiSecret) {
         $this->apiId = $apiId;
         $this->apiSecret = $apiSecret;
     }
 	
-
+    /**
+     * Génère les en-têtes de signature pour une requête API
+     * @param string $method Méthode HTTP (GET, POST, etc.)
+     * @param string $path Chemin de l'endpoint
+     * @param string $body Corps de la requête
+     * @return array Tableau des en-têtes à ajouter à la requête
+     */
     private function signRequest($method, $path, $body) {
         $contentMd5 = base64_encode(md5($body, true));
         $contentType = 'application/json;charset=UTF-8';
@@ -45,81 +63,101 @@ class soliscloudApi {
         ];
     }
 	
-	public function getInverterDetail($sn, $fullDetail = true) {
-		$body = '{
-			"sn": '.$sn.'
-		}';
+    /**
+     * Récupère le détail d'un onduleur via l'API SolisCloud
+     * @param string $sn Numéro de série de l'onduleur
+     * @param bool $fullDetail Indique si on souhaite le détail complet (non utilisé ici)
+     * @return array|null Détail de l'onduleur ou null si erreur
+     */
+    public function getInverterDetail($sn, $fullDetail = true) {
+        // Préparation du corps de la requête
+        $body = '{
+            "sn": '.$sn.'
+        }';
 
-		$contentMD5 = base64_encode(md5($body, true));
-		$contentType = 'application/json';
-		$gmdate = gmdate('D, d M Y H:i:s T');
-		$endPoint = '/v1/api/inverterDetail';
+        // Calcul des en-têtes nécessaires à l'authentification
+        $contentMD5 = base64_encode(md5($body, true));
+        $contentType = 'application/json';
+        $gmdate = gmdate('D, d M Y H:i:s T');
+        $endPoint = '/v1/api/inverterDetail';
 
-		$stringToSign = "POST\n$contentMD5\n$contentType\n$gmdate\n$endPoint";
-		$signature = base64_encode(hash_hmac('sha1', $stringToSign, $this->apiSecret, true));
-		$authorization = 'API ' . $this->apiId . ':' . $signature;
+        $stringToSign = "POST\n$contentMD5\n$contentType\n$gmdate\n$endPoint";
+        $signature = base64_encode(hash_hmac('sha1', $stringToSign, $this->apiSecret, true));
+        $authorization = 'API ' . $this->apiId . ':' . $signature;
 
-		$ch = curl_init();
-		$headers = array(
-			'Content-MD5: ' . $contentMD5,
-			'Authorization: ' . $authorization,
-			'Content-Type: ' . $contentType,
-			'Date: ' . $gmdate
-		);
+        // Initialisation de la requête cURL
+        $ch = curl_init();
+        $headers = array(
+            'Content-MD5: ' . $contentMD5,
+            'Authorization: ' . $authorization,
+            'Content-Type: ' . $contentType,
+            'Date: ' . $gmdate
+        );
 		
-		$url = 'https://www.soliscloud.com:13333' . $endPoint;
+        $url = 'https://www.soliscloud.com:13333' . $endPoint;
 
-		curl_setopt_array($ch, array(
-			CURLOPT_URL => $url,
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_ENCODING => '',
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_CUSTOMREQUEST => 'POST',
-			CURLOPT_POSTFIELDS => $body,
-			CURLOPT_HTTPHEADER => $headers,
-		));
+        // Configuration des options cURL
+        curl_setopt_array($ch, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $body,
+            CURLOPT_HTTPHEADER => $headers,
+        ));
 
-		$response = curl_exec($ch);
-		$json = json_decode($response, true);
-		if(isset($json["data"])) {
-			$this->inverterDetail = $json["data"];
-		} else {
-			$this->inverterDetail= null;
-		}
-		return $this->inverterDetail;
-	}
+        // Exécution de la requête et décodage de la réponse JSON
+        $response = curl_exec($ch);
+        $json = json_decode($response, true);
+        if(isset($json["data"])) {
+            $this->inverterDetail = $json["data"];
+        } else {
+            $this->inverterDetail= null;
+        }
+        return $this->inverterDetail;
+    }
 	
-	public function getInverterValue($fieldName, $defaultValue = "", $unit = ""){
-		if (isset($this->inverterDetail[$fieldName])) {
-			$value = $this->inverterDetail[$fieldName];
-			switch ($fieldName) {
-				case "state" : {
-									switch($value) {
-										case 1 : return "online";
-										case 2 : return "offline";
-										case 3 : return "alarm";
-										default : return "unknown";
-									}
-							} break;
-				default : 	{
-								if (strlen($unit) > 0 ) {
-									$inverterUnitFieldName = $fieldName."Str";
-									switch ($unit) {
-										case "W" : {
-														if (isset($this->inverterDetail[$inverterUnitFieldName])) {
-															if ($this->inverterDetail[$inverterUnitFieldName] == "kW") $value = floatval($value)*1000;
-															if ($this->inverterDetail[$inverterUnitFieldName] == "MW") $value = floatval($value)*1000000;
-														}
-													} break;
-									}
-								}
-							}
-			}
-			return $value;
-		} else return $defaultValue;
-	}
+    /**
+     * Récupère la valeur d'un champ de l'onduleur, avec gestion des unités et états spéciaux
+     * @param string $fieldName Nom du champ à récupérer
+     * @param mixed $defaultValue Valeur par défaut si le champ n'existe pas
+     * @param string $unit Unité attendue (ex : "W")
+     * @return mixed Valeur du champ ou valeur par défaut
+     */
+    public function getInverterValue($fieldName, $defaultValue = "", $unit = ""){
+        if (isset($this->inverterDetail[$fieldName])) {
+            $value = $this->inverterDetail[$fieldName];
+            switch ($fieldName) {
+                case "state" : {
+                                    // Conversion de l'état numérique en texte
+                                    switch($value) {
+                                        case 1 : return "online";
+                                        case 2 : return "offline";
+                                        case 3 : return "alarm";
+                                        default : return "unknown";
+                                    }
+                            } break;
+                default :    {
+                                // Gestion des conversions d'unités si nécessaire
+                                if (strlen($unit) > 0 ) {
+                                    $inverterUnitFieldName = $fieldName."Str";
+                                    switch ($unit) {
+                                        case "W" : {
+                                                        if (isset($this->inverterDetail[$inverterUnitFieldName])) {
+                                                            if ($this->inverterDetail[$inverterUnitFieldName] == "kW") $value = floatval($value)*1000;
+                                                            if ($this->inverterDetail[$inverterUnitFieldName] == "MW") $value = floatval($value)*1000000;
+                                                        }
+                                                    } break;
+                                    }
+                                }
+                            }
+            }
+            return $value;
+        } else return $defaultValue;
+    }
 
 }
 
