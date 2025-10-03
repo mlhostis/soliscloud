@@ -28,8 +28,6 @@ include_once "soliscloudApi.class.php";
 class soliscloud extends eqLogic {
     
 	/*     * *************************Attributs****************************** */
-	// Liste des commandes chargées depuis le fichier de configuration
-	public $cmdList = array();
     
     /*
      * Permet de définir les possibilités de personnalisation du widget (en cas d'utilisation de la fonction 'toHtml' par exemple)
@@ -127,13 +125,14 @@ class soliscloud extends eqLogic {
      */
 	public function loadCommandConfFile($fileName = "solisCmdList.json") {
 		$jsonCmdList = file_get_contents(dirname(__FILE__) . '/'.$fileName);
-		$this->cmdList = json_decode($jsonCmdList, true);
+		$cmdList = json_decode($jsonCmdList, true);
 		
-		if (!is_array($this->cmdList)) {
+		if (!is_array($cmdList)) {
 			log::add('soliscloud','warning',__('Impossible de décoder le fichier '.$fileName, __FILE__));
 			log::add('soliscloud', 'error',$jsonCmdList);
-			log::add('soliscloud', 'error',"<pre>".print_r($this->cmdList,true)."</pre>");
+			log::add('soliscloud', 'error',"<pre>".print_r($cmdList,true)."</pre>");
 		}
+		return $cmdList;
 	}
 	
     /**
@@ -167,15 +166,15 @@ class soliscloud extends eqLogic {
      * Charge la configuration des commandes et les crée si besoin.
      */
     public function postSave() {
-		$this->loadCommandConfFile();
+		$cmdList = $this->loadCommandConfFile();
 		try {
-			foreach($this->cmdList['commands'] as $cmdConf) {
+			foreach($cmdList['commands'] as $cmdConf) {
 				$this->setCmdConfig($cmdConf);
 			}
-			log::add('soliscloud', 'info', "postSave ok nb=".count($this->cmdList['commands']));
+			log::add('soliscloud', 'info', "postSave ok nb=".count($cmdList['commands']));
 		} catch (\Exception $e) {
 			log::add('soliscloud','error',__('Erreur décodage fichier '.$inverterCmdFile, __FILE__));
-			log::add('soliscloud', 'error',"<pre>".print_r($this->cmdList,true)."</pre>");
+			log::add('soliscloud', 'error',"<pre>".print_r($cmdList,true)."</pre>");
 		}
 	}
 
@@ -200,7 +199,7 @@ class soliscloud extends eqLogic {
      * Gère les erreurs de configuration et journalise les actions.
      */
 	public function getsoliscloudData() {
-		$this->loadCommandConfFile();
+		$cmdList = $this->loadCommandConfFile();
 		$soliscloud_regisno = $this->getConfiguration("regisno");
 		$soliscloud_token = $this->getConfiguration("token");
 		$inverterSerialNumber = $this->getConfiguration("invertersn");
@@ -222,14 +221,14 @@ class soliscloud extends eqLogic {
 			log::add('soliscloud', 'debug',"<pre>".print_r($data,true)."</pre>");
 			if (is_array($data)) {
 				try {
-					foreach($this->cmdList['commands'] as $cmdConfig) {
+					foreach($cmdList['commands'] as $cmdConfig) {
 						if ($cmdConfig["type"] == "info") {
 							$value = $api->getInverterValue($cmdConfig["inverterValueId"], "", $cmdConfig["unit"]);
 							$this->checkAndUpdateCmd($cmdConfig["logicalId"], $value);
 							log::add('soliscloud','info',$cmdConfig["logicalId"]." (".$cmdConfig["inverterValueId"].") = ".$data[$cmdConfig["inverterValueId"]] ." => ".$value." ".$cmdConfig["unit"]);
 						}
 					}
-					log::add('soliscloud', 'debug', "getsoliscloudData ok nb=".count($this->cmdList['commands']));
+					log::add('soliscloud', 'debug', "getsoliscloudData ok nb=".count($cmdList['commands']));
 				} catch (\Exception $e) {
 					log::add('soliscloud','error',__('Erreur décodage fichier cmdList.json', __FILE__));
 				}
