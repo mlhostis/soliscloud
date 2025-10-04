@@ -102,15 +102,9 @@ foreach (jeeObject::all() as $object) {
         </div>
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label">{{Registration Number de l'onduleur}}</label>
+        <label class="col-sm-3 control-label">{{Solis Cloud API Registration Number}}</label>
         <div class="col-sm-3">
             <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="regisno" placeholder="Registration No"/>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label">{{Numéro de série de l'onduleur}}</label>
-        <div class="col-sm-3">
-            <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="invertersn" placeholder="Inverter Serial number"/>
         </div>
     </div>
 	<div class="form-group">
@@ -119,6 +113,13 @@ foreach (jeeObject::all() as $object) {
 			<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="token" placeholder="Token"/>
         </div>
     </div>
+	<div class="form-group">
+        <label class="col-sm-3 control-label">{{Numéro de série de l'onduleur}}</label>
+        <div class="col-sm-3">
+            <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="invertersn" placeholder="Inverter Serial number"/>
+        </div>
+    </div>
+
 </fieldset>
 </form>
 </div>
