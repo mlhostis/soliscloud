@@ -41,7 +41,7 @@ class soliscloud extends eqLogic {
      * Fonction exécutée automatiquement toutes les minutes par Jeedom.
      * Parcourt tous les équipements SolisCloud actifs et exécute la commande "refresh" si elle existe.
      */
-    public static function cron() {
+    /*public static function cron() {
 		foreach (self::byType('soliscloud') as $soliscloud) {
 			if ($soliscloud->getIsEnable() == 1) {
 				$cmd = $soliscloud->getCmd(null, 'refresh');
@@ -51,7 +51,7 @@ class soliscloud extends eqLogic {
 				$cmd->execCmd();
 			}
 		}      
-    }
+    }*/
  
     /**
      * Fonction exécutée automatiquement toutes les 5 minutes par Jeedom.
@@ -71,6 +71,36 @@ class soliscloud extends eqLogic {
      
     /*
      * Fonctions de cron supplémentaires (10, 15, 30 minutes, horaire, journalier) à implémenter si besoin.
+     */
+
+    /*
+     * Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
+      public static function cron10() {
+      }
+     */
+    
+    /*
+     * Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
+      public static function cron15() {
+      }
+     */
+    
+    /*
+     * Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
+      public static function cron30() {
+      }
+     */
+    
+    /*
+     * Fonction exécutée automatiquement toutes les heures par Jeedom
+      public static function cronHourly() {
+      }
+     */
+
+    /*
+     * Fonction exécutée automatiquement tous les jours par Jeedom
+      public static function cronDaily() {
+      }
      */
 
     /*     * *********************Méthodes d'instance************************* */
@@ -123,7 +153,7 @@ class soliscloud extends eqLogic {
      * Charge la liste des commandes depuis un fichier de configuration JSON.
      * @param string $fileName Nom du fichier de configuration (par défaut "solisCmdList.json")
      */
-	public function loadCommandConfFile($fileName = "solisCmdList.json") {
+	private function loadCommandConfFile($fileName = "solisCmdList.json") {
 		$jsonCmdList = file_get_contents(dirname(__FILE__) . '/'.$fileName);
 		$cmdList = json_decode($jsonCmdList, true);
 		
@@ -140,25 +170,63 @@ class soliscloud extends eqLogic {
      * @param array $cmdConfig Configuration de la commande (issue du JSON)
      */
     private function setCmdConfig($cmdConfig) {
+		$logicalId = "";
+		$name = "";
 		try {
-			$info = $this->getCmd(null, $cmdConfig["logicalId"]);
+			$logicalId = $cmdConfig["logicalId"];
+			$info = $this->getCmd(null, $logicalId);
 			if (!is_object($info)) {
 				$info = new soliscloudCmd();
-				$info->setName(__($cmdConfig["name"], __FILE__));
-				$info->setLogicalId($cmdConfig["logicalId"]);
-				$info->setEqLogic_id($this->getId());
-				$info->setType($cmdConfig["type"]);
-				$info->setSubType($cmdConfig["subType"]);
+				$name = __($cmdConfig["name"], __FILE__);
+				$info->setName($name);
+			}
+			$info->setLogicalId($logicalId);
+			$info->setEqLogic_id($this->getId());
+			$info->setType($cmdConfig["type"]);
+			$info->setSubType($cmdConfig["subType"]);
+			if ($logicalId != "refresh") {
 				$info->setIsHistorized($cmdConfig["historized"]);
 				$info->setIsVisible($cmdConfig["visible"]);	
 				$info->setUnite($cmdConfig["unit"]);
 				$info->setOrder($cmdConfig["order"]);
-				$info->save();
 			}
+			$info->save();
 		} catch (\Exception $e) {
-			log::add('soliscloud','error',__('Erreur setCmdConfig '));
+			log::add('soliscloud','error',__('Erreur setCmdConfig ', __FILE__)." logicalId:$logicalId name:$name");
 			log::add('soliscloud', 'error',"<pre>".print_r($cmdConfig,true)."</pre>");
 		}	
+		
+		
+		
+		/*
+		   $refresh = $this->getCmd(null, 'refresh');
+    if (!is_object($refresh)) {
+      $refresh = new solarmanCmd();
+      $refresh->setName(__('Rafraîchir', __FILE__));
+    }
+    $refresh->setEqLogic_id($this->getId());
+    $refresh->setLogicalId('refresh');
+    $refresh->setType('action');
+    $refresh->setSubType('other');
+    $refresh->save();
+		
+		
+		
+				$refresh = $this->getCmd(null, 'refresh');
+		if (!is_object($refresh)) {
+			$refresh = new solaxcloudCmd();
+			$refresh->setName(__('Refresh', __FILE__));
+		}
+		$refresh->setEqLogic_id($this->getId());
+		$refresh->setLogicalId('refresh');
+		$refresh->setType('action');
+		$refresh->setSubType('other');
+		$info->setIsHistorized(0);
+		$info->setIsVisible(0);	
+		$refresh->setOrder(1);
+		$refresh->save();
+		
+		*/
 	}
 	
     /**
@@ -166,7 +234,8 @@ class soliscloud extends eqLogic {
      * Charge la configuration des commandes et les crée si besoin.
      */
     public function postSave() {
-		$cmdList = $this->loadCommandConfFile();
+		$inverterCmdFile = "solisCmdList.json";
+		$cmdList = $this->loadCommandConfFile($inverterCmdFile);
 		try {
 			foreach($cmdList['commands'] as $cmdConf) {
 				$this->setCmdConfig($cmdConf);
