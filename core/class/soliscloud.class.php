@@ -286,7 +286,7 @@ class soliscloud extends eqLogic {
 		}
 		
 		$api = new soliscloudApi($soliscloud_regisno, $soliscloud_token);
-		if ($data = $api->getInverterDetail($inverterSerialNumber, true)) {
+		if ($data = $api->getInverterDetailFromList($inverterSerialNumber, true)) {
 			log::add('soliscloud', 'debug',"<pre>".print_r($data,true)."</pre>");
 			if (is_array($data)) {
 				try {

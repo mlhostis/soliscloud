@@ -63,24 +63,18 @@ class soliscloudApi {
         ];
     }
 	
-    /**
-     * Récupère le détail d'un onduleur via l'API SolisCloud
-     * @param string $sn Numéro de série de l'onduleur
-     * @param bool $fullDetail Indique si on souhaite le détail complet (non utilisé ici)
-     * @return array|null Détail de l'onduleur ou null si erreur
+	 /**
+     * Requetes vers solis cloud pour un endPoint
+     * @param string $endPoint ex: $endPoint = '/v1/api/inverterDetail';
+     * @param string $body	request body data 
+     * @return array Tableau de la réponse à la requête
      */
-    public function getInverterDetail($sn, $fullDetail = true) {
-        // Préparation du corps de la requête
-        $body = '{
-            "sn": '.$sn.'
-        }';
-
+    private function cloudRequest($endPoint, $body) {
         // Calcul des en-têtes nécessaires à l'authentification
         $contentMD5 = base64_encode(md5($body, true));
         $contentType = 'application/json';
         $gmdate = gmdate('D, d M Y H:i:s T');
-        $endPoint = '/v1/api/inverterDetail';
-
+  
         $stringToSign = "POST\n$contentMD5\n$contentType\n$gmdate\n$endPoint";
         $signature = base64_encode(hash_hmac('sha1', $stringToSign, $this->apiSecret, true));
         $authorization = 'API ' . $this->apiId . ':' . $signature;
@@ -112,11 +106,75 @@ class soliscloudApi {
         // Exécution de la requête et décodage de la réponse JSON
         $response = curl_exec($ch);
         $json = json_decode($response, true);
+		//structure du type array("success" => 0/1, "code" => "ex code", "msg" => "message du code")
+		$code = isset($json["code"]) ? $json["code"] : "unknown";
+        if($code != '0') {
+			$success = isset($json["success"]) ? $json["success"] : -1;
+			$msg = isset($json["msg"]) ? $json["msg"] : "unknown";
+			log::add('soliscloud', 'error',"getInverterDetail() failed code : $code message : $msg <pre>".print_r($json,true)."</pre>");
+            $json = false;
+        }
+		return $json;
+    }
+	
+	
+    /**
+     * Récupère le détail d'un onduleur via l'API SolisCloud
+     * @param string $sn Numéro de série de l'onduleur
+     * @param bool $fullDetail Indique si on souhaite le détail complet (non utilisé ici)
+     * @return array|null Détail de l'onduleur ou null si erreur
+     */
+    public function getInverterDetail($sn, $fullDetail = true) {
+        // Préparation du corps de la requête
+        $body = '{
+            "sn": '.$sn.'
+        }';
+		
+		$endPoint = '/v1/api/inverterDetail';
+		$json = $this->cloudRequest($endPoint, $body);
+		
+		//structure du type array("success" => 0/1, "code" => "ex code", "msg" => "message du code")
         if(isset($json["data"])) {
             $this->inverterDetail = $json["data"];
         } else {
             $this->inverterDetail= null;
         }
+        return $this->inverterDetail;
+    }
+	
+	
+	/**
+     * Récupère le détail d'un onduleur via l'API SolisCloud à partir du enpoint inverterDetailList
+     * @param string $sn Numéro de série de l'onduleur
+     * @param bool $fullDetail Indique si on souhaite le détail complet (non utilisé ici)
+     * @return array|null Détail de l'onduleur ou null si erreur
+     */
+    public function getInverterDetailFromList($sn, $fullDetail = true) {
+        // Préparation du corps de la requête
+        $body = '{
+            "pageNo": "1",
+			"pageSize" : "5"
+        }';
+		
+		$endPoint = '/v1/api/inverterDetailList';
+		$json = $this->cloudRequest($endPoint, $body);
+		$this->inverterDetail = false;
+		
+        if ($json) {
+			if(isset($json["data"]["records"])) {
+				foreach($json["data"]["records"] as $record) {
+					if( $record["sn"] == $sn) {
+						$this->inverterDetail = $record;
+						break;
+					}
+				}
+				if (!$this->inverterDetail) {
+					log::add('soliscloud', 'error',"inverter serial number not found nb inverter = ".count($json["data"]["records"])." <pre>".print_r($json["data"]["records"],true)."</pre>");
+				}	
+			} else {
+				log::add('soliscloud', 'error',"Inverter record found but format unknown <pre>".print_r($json,true)."</pre>");
+			}
+		}
         return $this->inverterDetail;
     }
 	
