@@ -41,7 +41,7 @@ class soliscloud extends eqLogic {
      * Fonction exécutée automatiquement toutes les minutes par Jeedom.
      * Parcourt tous les équipements SolisCloud actifs et exécute la commande "refresh" si elle existe.
      */
-    /*public static function cron() {
+    public static function cron() {
 		foreach (self::byType('soliscloud') as $soliscloud) {
 			if ($soliscloud->getIsEnable() == 1) {
 				$cmd = $soliscloud->getCmd(null, 'refresh');
@@ -51,13 +51,13 @@ class soliscloud extends eqLogic {
 				$cmd->execCmd();
 			}
 		}      
-    }*/
+    }
  
     /**
      * Fonction exécutée automatiquement toutes les 5 minutes par Jeedom.
      * Même logique que cron(), mais appelée à une autre fréquence.
      */
-    public static function cron5() {
+    /*public static function cron5() {
 		foreach (self::byType('soliscloud') as $soliscloud) {
 			if ($soliscloud->getIsEnable() == 1) {
 				$cmd = $soliscloud->getCmd(null, 'refresh');
@@ -67,7 +67,7 @@ class soliscloud extends eqLogic {
 				$cmd->execCmd();
 			}
 		} 
-    }
+    }*/
      
     /*
      * Fonctions de cron supplémentaires (10, 15, 30 minutes, horaire, journalier) à implémenter si besoin.
