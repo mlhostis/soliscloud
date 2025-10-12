@@ -59,7 +59,7 @@
          "name":"AC Energy Out (Total)",
          "type":"info",
          "subType":"numeric",
-         "unit":"kWh",
+         "unit":"MWh",
          "order":"6",
          "historized":false,
          "visible":true,
@@ -70,7 +70,7 @@
          "name":"Energy from Grid (Total)",
          "type":"info",
          "subType":"numeric",
-         "unit":"kWh",
+         "unit":"MWh",
          "order":"9",
          "historized":false,
          "visible":true,
@@ -163,6 +163,72 @@
          "historized":false,
          "visible":true,
          "inverterValueId":"inverterTemperature"
+      },
+      {
+         "logicalId":"uAc",
+         "name":"AC Voltage: ",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"V",
+         "order":"22",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"uAc1"
+      },
+      {
+         "logicalId":"batteryTodayChargeEnergy",
+         "name":"battery today charge energy: ",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"kWh",
+         "order":"23",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"batteryTodayChargeEnergy"
+      },
+      {
+         "logicalId":"batteryTodayDischargeEnergy",
+         "name":"battery today discharge energy: ",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"kWh",
+         "order":"24",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"batteryTodayDischargeEnergy"
+      },
+      {
+         "logicalId":"gridPurchasedTodayEnergy",
+         "name":"grid purchased today energy: ",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"kWh",
+         "order":"25",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"gridPurchasedTodayEnergy"
+      },
+      {
+         "logicalId":"gridSellTodayEnergy",
+         "name":"grid sell today energy: ",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"kWh",
+         "order":"26",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"gridSellTodayEnergy"
+      },
+      {
+         "logicalId":"homeLoadTodayEnergy",
+         "name":"home load today energy: ",
+         "type":"info",
+         "subType":"numeric",
+         "unit":"kWh",
+         "order":"27",
+         "historized":false,
+         "visible":true,
+         "inverterValueId":"homeLoadTodayEnergy"
       }
    ]
 }
