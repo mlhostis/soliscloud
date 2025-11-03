@@ -162,15 +162,19 @@ class soliscloudApi {
 		
         if ($json) {
 			if(isset($json["data"]["records"])) {
-				foreach($json["data"]["records"] as $record) {
-					if( $record["sn"] == $sn) {
-						$this->inverterDetail = $record;
-						break;
+				if( count($json["data"]["records"]) > 0) {
+					foreach($json["data"]["records"] as $record) {
+						if( $record["sn"] == $sn) {
+							$this->inverterDetail = $record;
+							break;
+						}
 					}
-				}
-				if (!$this->inverterDetail) {
-					log::add('soliscloud', 'error',"inverter serial number not found nb inverter = ".count($json["data"]["records"])." <pre>".print_r($json["data"]["records"],true)."</pre>");
-				}	
+					if (!$this->inverterDetail) {
+						log::add('soliscloud', 'error',"inverter serial number not found nb inverter = ".count($json["data"]["records"])." <pre>".print_r($json["data"]["records"],true)."</pre>");
+					}
+				} else {
+					log::add('soliscloud', 'debug',"API request ok but no inverter found. Maybe not connected");
+				}					
 			} else {
 				log::add('soliscloud', 'error',"Inverter record found but format unknown <pre>".print_r($json,true)."</pre>");
 			}
