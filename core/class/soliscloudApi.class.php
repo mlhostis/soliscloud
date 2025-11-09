@@ -111,7 +111,7 @@ class soliscloudApi {
         if($code != '0') {
 			$success = isset($json["success"]) ? $json["success"] : -1;
 			$msg = isset($json["msg"]) ? $json["msg"] : "unknown";
-			log::add('soliscloud', 'error',"getInverterDetail() failed code : $code message : $msg <pre>".print_r($json,true)."</pre>");
+			log::add('soliscloud', 'error',"cloudRequest() failed code : $code message : $msg <pre>".print_r($json,true)."</pre>");
             $json = false;
         }
 		return $json;
@@ -219,6 +219,33 @@ class soliscloudApi {
             }
             return $value;
         } else return $defaultValue;
+    }
+	
+	 /**
+     * Récupère un élément de configuration d'un onduleur via l'API SolisCloud
+     * @param string $sn Numéro de série de l'onduleur
+     * @param int    $cid control id => id de l'élément de configuration 
+     * @return array|null Détail de l'onduleur ou null si erreur
+     */
+    public function getControlValue($sn, $cid) {
+        // Préparation du corps de la requête
+        $body = '{
+            "sn": "'.$sn.'",
+			"cid": "'.$cid.'"
+        }';
+		$result = false;
+		
+		$endPoint = '/v2/api/atRead';
+		$json = $this->cloudRequest($endPoint, $body);
+		
+		//structure du type array("success" => 0/1, "code" => "ex code", "msg" => "message du code")
+        if(isset($json["data"])) {
+			log::add('soliscloud', 'debug',"getControlValue($sn,$cid) = <pre>".print_r($json,true)."</pre>");
+			return $json["data"];
+        } else {
+			log::add('soliscloud', 'error',"getControlValue($sn,$cid) error return = <pre>".print_r($body,true)."</pre>");
+			return false;
+        }
     }
 
 }

@@ -302,8 +302,13 @@ class soliscloud extends eqLogic {
 					log::add('soliscloud','error',__('Erreur décodage fichier cmdList.json', __FILE__));
 				}
 			}
+			//test control API
+			$cid = false; //103;//142;
+			if ($cid && $data = $api->getControlValue($inverterSerialNumber, $cid)) {
+				log::add('soliscloud', 'info',"getControlValue() succeded");
+			}
 		} else {
-			log::add('soliscloud', 'error',"getInverterData() failed");
+			log::add('soliscloud', 'info',"getInverterData($inverterSerialNumber) failed");
 		}
 
 	}
