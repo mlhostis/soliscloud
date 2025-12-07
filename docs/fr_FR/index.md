@@ -18,15 +18,13 @@ Liste non exhaustive des onduleurs pris en compte à l'heure actuelle:
 | SOLIS S6-EHP1P(3-6k)K-L                  |                                                                                                                               |
 | ...                                      |                                                                                                                               |
 
-<br><br><br><br><br>
+La documentation complémentaire sur les API des onduleurs se trouve dans [le répertoire onduleurs](docs_onduleurs).
 
-La documentation complémentaire se trouve dans [le répertoire onduleurs](doc_onduleurs).
-
-<br><br>
+<br>
 
 Installation du plugin
 ===
-Installer le plugin à partir du Jeedom market. Vous pouvez choisir la version stable ou la version Beta pour obtenir les dernières mises à jours.
+Installer le plugin à partir du Jeedom market. Vous pouvez choisir la version stable ou la version Beta pour obtenir les dernières mises à jour.
 
 Configuration générale du plugin
 ==
@@ -52,9 +50,9 @@ Ensuite, il faut que vous saisissiez l'API registration number et le token que v
 
 ![paramétrage clé API](APImanagementSolis.png)
 
-Si vous ne trouvez pas ces identifiants sur le portail Solis, il faut demander au support solis d'activer la clé d'API pour votre compte Solis.
+Si vous ne trouvez pas ces identifiants sur le portail Solis, il faut demander au support Solis d'activer la clé d'API pour votre compte Solis.
 
-Ensuite saisissez l'identifiant de l'onduleur au format base 10 (et pas au format hexadécimal). Vpoici un exemple de convertisseur : https://sebastienguillon.com/test/javascript/convertisseur.html 
+Ensuite saisissez l'identifiant de l'onduleur au format base 10 (et pas au format hexadécimal). Voici un exemple de convertisseur : https://sebastienguillon.com/test/javascript/convertisseur.html 
 
 ## Paramétrage de la réserve batterie:
 
@@ -68,7 +66,7 @@ Par exemple, si vos heures creuses débuttent à 22h et se terminent à 6h, il v
 Remerciements
 ===
 
-Merci à @phroc qui a développé le plugin solax cloud duquel je me suis inspiré
+Merci à @phroc qui a développé le plugin solax cloud duquel je me suis inspiré.
 
 Bug
 ===
