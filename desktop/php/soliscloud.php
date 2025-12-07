@@ -102,13 +102,13 @@ foreach (jeeObject::all() as $object) {
         </div>
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label">{{Solis Cloud API Registration Number}}</label>
+        <label class="col-sm-3 control-label" title="disponible sur votre portail solis cloud">{{Solis Cloud API Registration Number}}</label>
         <div class="col-sm-3">
             <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="regisno" placeholder="Registration No"/>
         </div>
     </div>
 	<div class="form-group">
-        <label class="col-sm-3 control-label">{{Solis cloud API Token}}</label>
+        <label class="col-sm-3 control-label" title="disponible sur votre portail solis cloud (demandez au support Solis si non visible)">{{Solis cloud API Token}}</label>
         <div class="col-sm-3">
 			<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="token" placeholder="Token"/>
         </div>
@@ -119,7 +119,34 @@ foreach (jeeObject::all() as $object) {
             <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="invertersn" placeholder="Inverter Serial number"/>
         </div>
     </div>
-
+ 	<div class="form-group">
+		<label class="col-sm-3 control-label"></label>
+        <div class="col-sm-3">
+			<br>
+			<label class="control-label">{{Paramètres de la réserve batterie}}</label>
+        </div>
+    </div>
+	<div class="form-group">
+        <label class="col-sm-3 control-label" title="heure au format HHMM">{{Heure changement réserve SOC 1}}</label>
+        <div class="col-sm-3">
+            <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="reserveSoc1Hour" placeholder="Reserve SOC 1 hour"/>
+        </div>
+		<label class="col-sm-3 control-label" title="réserve minimale % charge batterie">{{SOC 1 (%)}}</label>
+        <div class="col-sm-3">
+            <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="reserveSoc1" placeholder="Reserve SOC 1"/>
+        </div>
+    </div>
+	<div class="form-group">
+        <label class="col-sm-3 control-label" title="heure au format HHMM">{{Heure changement réserve SOC 2}}</label>
+        <div class="col-sm-3">
+            <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="reserveSoc2Hour" placeholder="Reserve SOC 2 hour"/>
+        </div>
+		<label class="col-sm-3 control-label" title="réserve minimale % charge batterie">{{SOC 2 (%)}}</label>
+        <div class="col-sm-3">
+            <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="reserveSoc2" placeholder="Reserve SOC 2"/>
+        </div>
+    </div>
+	
 </fieldset>
 </form>
 </div>

@@ -174,59 +174,29 @@ class soliscloud extends eqLogic {
 		$name = "";
 		try {
 			$logicalId = $cmdConfig["logicalId"];
-			$info = $this->getCmd(null, $logicalId);
-			if (!is_object($info)) {
-				$info = new soliscloudCmd();
+			$cmd = $this->getCmd(null, $logicalId);
+			if (!is_object($cmd)) {
+				$cmd = new soliscloudCmd();
 				$name = __($cmdConfig["name"], __FILE__);
-				$info->setName($name);
+				$cmd->setName($name);
 			}
-			$info->setLogicalId($logicalId);
-			$info->setEqLogic_id($this->getId());
-			$info->setType($cmdConfig["type"]);
-			$info->setSubType($cmdConfig["subType"]);
+			$cmd->setLogicalId($logicalId);
+			$cmd->setEqLogic_id($this->getId());
+			$cmd->setType($cmdConfig["type"]);
+			$cmd->setSubType($cmdConfig["subType"]);
 			if ($logicalId != "refresh") {
-				$info->setIsHistorized($cmdConfig["historized"]);
-				$info->setIsVisible($cmdConfig["visible"]);	
-				$info->setUnite($cmdConfig["unit"]);
-				$info->setOrder($cmdConfig["order"]);
+				$cmd->setIsHistorized($cmdConfig["historized"]);
+				$cmd->setIsVisible($cmdConfig["visible"]);	
+				$cmd->setUnite($cmdConfig["unit"]);
+				$cmd->setOrder($cmdConfig["order"]);
+				if (isset($cmdConfig["minValue"]))	$cmd->setConfiguration('minValue' , $cmdConfig["minValue"]);
+				if (isset($cmdConfig["maxValue"]))	$cmd->setConfiguration('maxValue' , $cmdConfig["maxValue"]);
 			}
-			$info->save();
+			$cmd->save();
 		} catch (\Exception $e) {
 			log::add('soliscloud','error',__('Erreur setCmdConfig ', __FILE__)." logicalId:$logicalId name:$name");
 			log::add('soliscloud', 'error',"<pre>".print_r($cmdConfig,true)."</pre>");
-		}	
-		
-		
-		
-		/*
-		   $refresh = $this->getCmd(null, 'refresh');
-    if (!is_object($refresh)) {
-      $refresh = new solarmanCmd();
-      $refresh->setName(__('Rafraîchir', __FILE__));
-    }
-    $refresh->setEqLogic_id($this->getId());
-    $refresh->setLogicalId('refresh');
-    $refresh->setType('action');
-    $refresh->setSubType('other');
-    $refresh->save();
-		
-		
-		
-				$refresh = $this->getCmd(null, 'refresh');
-		if (!is_object($refresh)) {
-			$refresh = new solaxcloudCmd();
-			$refresh->setName(__('Refresh', __FILE__));
 		}
-		$refresh->setEqLogic_id($this->getId());
-		$refresh->setLogicalId('refresh');
-		$refresh->setType('action');
-		$refresh->setSubType('other');
-		$info->setIsHistorized(0);
-		$info->setIsVisible(0);	
-		$refresh->setOrder(1);
-		$refresh->save();
-		
-		*/
 	}
 	
     /**
@@ -263,15 +233,14 @@ class soliscloud extends eqLogic {
         
     }
 
+
     /**
-     * Récupère les données de l'onduleur via l'API SolisCloud et met à jour les commandes Jeedom.
-     * Gère les erreurs de configuration et journalise les actions.
+     * Récupère l'objet API après authentification pour les appels vers l'API Solis Cloud
+     * returne l'objet API 
      */
-	public function getsoliscloudData() {
-		$cmdList = $this->loadCommandConfFile();
+	private function getAuthorizedApi() {
 		$soliscloud_regisno = $this->getConfiguration("regisno");
 		$soliscloud_token = $this->getConfiguration("token");
-		$inverterSerialNumber = $this->getConfiguration("invertersn");
 		
 		if (strlen($soliscloud_regisno) == 0) {
 			log::add('soliscloud', 'debug','Registration Number not provided ...');
@@ -286,6 +255,17 @@ class soliscloud extends eqLogic {
 		}
 		
 		$api = new soliscloudApi($soliscloud_regisno, $soliscloud_token);
+		return $api;
+	}
+	
+	
+    /**
+     * Récupère les données de l'onduleur via l'API SolisCloud et met à jour les commandes Jeedom.
+     * Gère les erreurs de configuration et journalise les actions.
+     */
+	public function getsoliscloudData() {
+		$inverterSerialNumber = $this->getConfiguration("invertersn");
+		$api = $this->getAuthorizedApi();
 		if ($data = $api->getInverterDetailFromList($inverterSerialNumber, true)) {
 			log::add('soliscloud', 'debug',"<pre>".print_r($data,true)."</pre>");
 			if (is_array($data)) {
@@ -295,6 +275,11 @@ class soliscloud extends eqLogic {
 							$value = $api->getInverterValue($cmdConfig["inverterValueId"], "", $cmdConfig["unit"]);
 							$this->checkAndUpdateCmd($cmdConfig["logicalId"], $value);
 							log::add('soliscloud','info',$cmdConfig["logicalId"]." (".$cmdConfig["inverterValueId"].") = ".$data[$cmdConfig["inverterValueId"]] ." => ".$value." ".$cmdConfig["unit"]);
+						} else if ($cmdConfig["type"] == "action" && $cmdConfig["name"] != "Refresh") {
+							//commande de type "action" => lecture des paramètres de l'onduleur
+							if ($value = $api->getControlValue($inverterSerialNumber, $cmdConfig["inverterValueId"])) {
+								log::add('soliscloud', 'info',"getControlValue() succeded value = $value");
+							}
 						}
 					}
 					log::add('soliscloud', 'debug', "getsoliscloudData ok nb=".count($cmdList['commands']));
@@ -303,14 +288,68 @@ class soliscloud extends eqLogic {
 				}
 			}
 			//test control API
-			$cid = false; //103;//142;
+			/*$cid = false; //103;//142;
 			if ($cid && $data = $api->getControlValue($inverterSerialNumber, $cid)) {
 				log::add('soliscloud', 'info',"getControlValue() succeded");
-			}
+			}*/
+			//modifie le SOC reserve en fonction de la configuration
+			$this->setSOCReserve($api, $inverterSerialNumber);
 		} else {
 			log::add('soliscloud', 'info',"getInverterData($inverterSerialNumber) failed");
 		}
-
+	}
+	
+	
+	
+    /**
+     * Initialise le taux de réserve de la batterie via l'API SolisCloud
+	 * @param $logicalId 	integer 
+	 * @param $value	integer : value to set the control id
+     */
+	public function setSolisControl($logicalId, $value) {
+		$inverterSerialNumber = $this->getConfiguration("invertersn");
+		switch($logicalId) {
+			case "reservedSOC" : $cid = 157; break;
+			default: $cid = false;
+		}
+		if ($cid && $api = $this->getAuthorizedApi() ) {
+			$result = $api->setControlValue($inverterSerialNumber, $cid, $value);
+			log::add('soliscloud', 'info',"setControlValue($cid, $value) succeded : $result");
+		} else {
+			log::add('soliscloud', 'info',"setControlValue($cid,$value) for inverter $inverterSerialNumber failed");
+		}
+	}
+	
+	 /**
+     * Lance de processus de mise à jour des parametres de l'onduleur en fonction de la configuration (heure, parametre)
+	 * @param $logicalId 	integer 
+	 * @param $value	integer : value to set the control id
+     */
+	public function setSOCReserve($api, $inverterSerialNumber) {
+		$reserveSoc1Hour = $this->getConfiguration("reserveSoc1Hour");
+		$reserveSoc1 = $this->getConfiguration("reserveSoc1");
+		$reserveSoc2Hour = $this->getConfiguration("reserveSoc2Hour");
+		$reserveSoc2 = $this->getConfiguration("reserveSoc2");
+		$hour = date('Hi', time());
+		log::add('soliscloud', 'info',"setSOCReserve() start reserveSoc1Hour=$reserveSoc1Hour reserveSoc1=$reserveSoc1 reserveSoc2Hour=$reserveSoc2Hour reserveSoc2=$reserveSoc2  hour=$hour");
+		if (strlen($reserveSoc1Hour) == 4 && strlen($reserveSoc2Hour) == 4 && $reserveSoc1 > 0 && $reserveSoc1 <= 100 && $reserveSoc2 > 0 && $reserveSoc2 <= 100) {
+			//gère l'odre de configuration choisi
+			if ($reserveSoc2Hour > $reserveSoc1Hour) {
+				$newSocReserve = (($hour > $reserveSoc1Hour) && ($hour < $reserveSoc2Hour)) ? $reserveSoc1 : $reserveSoc2;
+			} else {
+				$newSocReserve = (($hour > $reserveSoc2Hour) && ($hour < $reserveSoc1Hour)) ? $reserveSoc2 : $reserveSoc1;
+			}
+			
+			if ($newSocReserve > 0 && $newSocReserve <= 100) {
+				$socReserveControId = 157;
+				$socReserve = $api->getControlValue($inverterSerialNumber, $socReserveControId);
+				log::add('soliscloud', 'info',"setSOCReserve() format valide, socReserve = $socReserve, nouvelle valeur socReserve souhaitée=$newSocReserve");
+				if ($socReserve > 0 && $newSocReserve != $socReserve) {
+					$result = $api->setControlValue($inverterSerialNumber, $socReserveControId, $newSocReserve);
+					log::add('soliscloud', 'info',"setSOCReserve() changement valeur socReserve=$newSocReserve $result");
+				}
+			}
+		}
 	}
 	
 
@@ -368,7 +407,7 @@ class soliscloudCmd extends cmd {
 			case 'refresh':
 				$info = $eqlogic->getsoliscloudData();
 				break;					
-		}        
+		}
     }
 
     /*     * **********************Getteur Setteur*************************** */
