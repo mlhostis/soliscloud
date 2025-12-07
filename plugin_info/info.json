@@ -2,7 +2,7 @@
 	"id" : "soliscloud",
 	"name" : "Solis Cloud",
 	"description" : "Plugin permettant de récupérer les infos des onduleurs Solis Cloud",
-	"licence" : "AGPL",
+	"licence" : "GPLv3",
 	"author" : "Michel29",
 	"require" : "0.1",
 	"category" : "energy",
