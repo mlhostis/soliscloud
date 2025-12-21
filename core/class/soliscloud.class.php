@@ -274,11 +274,11 @@ class soliscloud extends eqLogic {
 						if ($cmdConfig["type"] == "info") {
 							$value = $api->getInverterValue($cmdConfig["inverterValueId"], "", $cmdConfig["unit"]);
 							$this->checkAndUpdateCmd($cmdConfig["logicalId"], $value);
-							log::add('soliscloud','info',$cmdConfig["logicalId"]." (".$cmdConfig["inverterValueId"].") = ".$data[$cmdConfig["inverterValueId"]] ." => ".$value." ".$cmdConfig["unit"]);
+							log::add('soliscloud','debug',$cmdConfig["logicalId"]." (".$cmdConfig["inverterValueId"].") = ".$data[$cmdConfig["inverterValueId"]] ." => ".$value." ".$cmdConfig["unit"]);
 						} else if ($cmdConfig["type"] == "action" && $cmdConfig["name"] != "Refresh") {
 							//commande de type "action" => lecture des paramètres de l'onduleur
 							if ($value = $api->getControlValue($inverterSerialNumber, $cmdConfig["inverterValueId"])) {
-								log::add('soliscloud', 'info',"getControlValue() succeded value = $value");
+								log::add('soliscloud', 'debug',"getControlValue() succeded value = $value");
 							}
 						}
 					}

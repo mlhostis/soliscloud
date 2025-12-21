@@ -89,9 +89,9 @@ class soliscloudApi {
         );
 		
         $url = 'https://www.soliscloud.com:13333' . $endPoint;
-log::add('soliscloud', 'debug',"cloudRequest() : $url");
+/*log::add('soliscloud', 'debug',"cloudRequest() : $url");
 log::add('soliscloud', 'debug',"cloudRequest() header : ".print_r($headers,true));
-log::add('soliscloud', 'debug',"cloudRequest() body : ".print_r($body,true));
+log::add('soliscloud', 'debug',"cloudRequest() body : ".print_r($body,true));*/
         // Configuration des options cURL
         curl_setopt_array($ch, array(
             CURLOPT_URL => $url,
@@ -114,7 +114,7 @@ log::add('soliscloud', 'debug',"cloudRequest() response : ".print_r($json,true))
         if($code != '0') {
 			$success = isset($json["success"]) ? $json["success"] : -1;
 			$msg = isset($json["msg"]) ? $json["msg"] : "unknown";
-			log::add('soliscloud', 'error',"cloudRequest() failed code : $code message : $msg <pre>".print_r($json,true)."</pre>");
+			log::add('soliscloud', 'warning',"cloudRequest() failed code : $code message : $msg <pre>".print_r($json,true)."</pre>");
             $json = false;
         }
 		return $json;
@@ -246,7 +246,7 @@ log::add('soliscloud', 'debug',"cloudRequest() response : ".print_r($json,true))
 			log::add('soliscloud', 'debug',"getControlValue($sn, $cid) = <pre>".print_r($json,true)."</pre>");
 			return $json["data"]["msg"];
         } else {
-			log::add('soliscloud', 'error',"getControlValue($sn, $cid) error return = <pre>".print_r($body,true)."</pre>");
+			log::add('soliscloud', 'warning',"getControlValue($sn, $cid) error return = <pre>".print_r($body,true)."</pre>");
 			return false;
         }
     }
