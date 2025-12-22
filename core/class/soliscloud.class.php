@@ -265,6 +265,8 @@ class soliscloud extends eqLogic {
      */
 	public function getsoliscloudData() {
 		$inverterSerialNumber = $this->getConfiguration("invertersn");
+		$inverterCmdFile = "solisCmdList.json";
+		$cmdList = $this->loadCommandConfFile($inverterCmdFile);
 		$api = $this->getAuthorizedApi();
 		if ($data = $api->getInverterDetailFromList($inverterSerialNumber, true)) {
 			log::add('soliscloud', 'debug',"<pre>".print_r($data,true)."</pre>");
@@ -287,11 +289,6 @@ class soliscloud extends eqLogic {
 					log::add('soliscloud','error',__('Erreur décodage fichier cmdList.json', __FILE__));
 				}
 			}
-			//test control API
-			/*$cid = false; //103;//142;
-			if ($cid && $data = $api->getControlValue($inverterSerialNumber, $cid)) {
-				log::add('soliscloud', 'info',"getControlValue() succeded");
-			}*/
 			//modifie le SOC reserve en fonction de la configuration
 			$this->setSOCReserve($api, $inverterSerialNumber);
 		} else {
