@@ -90,8 +90,8 @@ class soliscloudApi {
 		
         $url = 'https://www.soliscloud.com:13333' . $endPoint;
 /*log::add('soliscloud', 'debug',"cloudRequest() : $url");
-log::add('soliscloud', 'debug',"cloudRequest() header : ".print_r($headers,true));
-log::add('soliscloud', 'debug',"cloudRequest() body : ".print_r($body,true));*/
+log::add('soliscloud', 'debug',"cloudRequest() header : ".print_r($headers,true));*/
+		log::add('soliscloud', 'debug',"cloudRequest() body : ".print_r($body,true));
         // Configuration des options cURL
         curl_setopt_array($ch, array(
             CURLOPT_URL => $url,
@@ -108,7 +108,7 @@ log::add('soliscloud', 'debug',"cloudRequest() body : ".print_r($body,true));*/
         // Exécution de la requête et décodage de la réponse JSON
         $response = curl_exec($ch);
         $json = json_decode($response, true);
-log::add('soliscloud', 'debug',"cloudRequest() response : ".print_r($json,true));
+		log::add('soliscloud', 'debug',"cloudRequest() response : ".print_r($json,true));
 		//structure du type array("success" => 0/1, "code" => "ex code", "msg" => "message du code")
 		$code = isset($json["code"]) ? $json["code"] : "unknown";
         if($code != '0') {
@@ -265,17 +265,16 @@ log::add('soliscloud', 'debug',"cloudRequest() response : ".print_r($json,true))
 			"cid": '.$cid.',
 			"value": '.$value.'
         }';
-		$result = false;
 		
 		$endPoint = '/v2/api/control';
 		$json = $this->cloudRequest($endPoint, $body);
 		
 		//structure du type array("success" => 0/1, "code" => "ex code", "msg" => "message du code")
         if(isset($json["data"])) {
-			log::add('soliscloud', 'debug',"setControlValue($sn,$cid) = <pre>".print_r($json,true)."</pre>");
-			return $json["data"]["msg"];
+			log::add('soliscloud', 'debug',"setControlValue($sn, $cid, $value) = <pre>".print_r($json,true)."</pre>");
+			return $json["data"]["0"]["msg"];
         } else {
-			log::add('soliscloud', 'error',"setControlValue($sn,$cid) error return = <pre>".print_r($body,true)."</pre>");
+			log::add('soliscloud', 'error',"setControlValue($sn, $cid, $value) error return = <pre>".print_r($body,true)."</pre>");
 			return false;
         }
     }

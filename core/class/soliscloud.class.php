@@ -279,9 +279,9 @@ class soliscloud extends eqLogic {
 							log::add('soliscloud','debug',$cmdConfig["logicalId"]." (".$cmdConfig["inverterValueId"].") = ".$data[$cmdConfig["inverterValueId"]] ." => ".$value." ".$cmdConfig["unit"]);
 						} else if ($cmdConfig["type"] == "action" && $cmdConfig["name"] != "Refresh") {
 							//commande de type "action" => lecture des paramètres de l'onduleur
-							if ($value = $api->getControlValue($inverterSerialNumber, $cmdConfig["inverterValueId"])) {
+							/*if ($value = $api->getControlValue($inverterSerialNumber, $cmdConfig["inverterValueId"])) {
 								log::add('soliscloud', 'debug',"getControlValue() succeded value = $value");
-							}
+							}*/
 						}
 					}
 					log::add('soliscloud', 'debug', "getsoliscloudData ok nb=".count($cmdList['commands']));
@@ -303,7 +303,7 @@ class soliscloud extends eqLogic {
 	 * @param $logicalId 	integer 
 	 * @param $value	integer : value to set the control id
      */
-	public function setSolisControl($logicalId, $value) {
+	/*public function setSolisControl($logicalId, $value) {
 		$inverterSerialNumber = $this->getConfiguration("invertersn");
 		switch($logicalId) {
 			case "reservedSOC" : $cid = 157; break;
@@ -315,7 +315,7 @@ class soliscloud extends eqLogic {
 		} else {
 			log::add('soliscloud', 'info',"setControlValue($cid,$value) for inverter $inverterSerialNumber failed");
 		}
-	}
+	}*/
 	
 	 /**
      * Lance de processus de mise à jour des parametres de l'onduleur en fonction de la configuration (heure, parametre)
@@ -337,13 +337,13 @@ class soliscloud extends eqLogic {
 				$newSocReserve = (($hour > $reserveSoc2Hour) && ($hour < $reserveSoc1Hour)) ? $reserveSoc2 : $reserveSoc1;
 			}
 			
-			if ($newSocReserve > 0 && $newSocReserve <= 100) {
-				$socReserveControId = 157;
+			if ($newSocReserve > 10 && $newSocReserve <= 100) { //controle valeur par mesure de sécurité
+				$socReserveControId = 157; //cid pour controle réserve batterie
 				$socReserve = $api->getControlValue($inverterSerialNumber, $socReserveControId);
-				log::add('soliscloud', 'info',"setSOCReserve() format valide, socReserve = $socReserve, nouvelle valeur socReserve souhaitée=$newSocReserve");
+				log::add('soliscloud', 'info',"setSOCReserve() format valide, socReserve = $socReserve, nouvelle valeur socReserve souhaitée = $newSocReserve");
 				if ($socReserve > 0 && $newSocReserve != $socReserve) {
 					$result = $api->setControlValue($inverterSerialNumber, $socReserveControId, $newSocReserve);
-					log::add('soliscloud', 'info',"setSOCReserve() changement valeur socReserve=$newSocReserve $result");
+					log::add('soliscloud', 'info',"setSOCReserve() changement valeur socReserve=$newSocReserve réponse = $result");
 				}
 			}
 		}
